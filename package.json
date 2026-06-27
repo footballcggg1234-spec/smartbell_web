@@ -1,0 +1,16 @@
+{
+  "name": "smartbell-server",
+  "version": "1.0.0",
+  "description": "SmartBell Control Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.x.x",
+    "express": "^4.x.x",
+    "mongoose": "^8.x.x",
+    "socket.io": "^4.x.x"
+  }
+}
