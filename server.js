@@ -27,9 +27,20 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve static files from public folder
+app.use(express.static(path.join(__dirname, 'public'), {
+  index: 'index.html',
+  extensions: ['html', 'js', 'css']
+}));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Serve index.html for all routes (SPA support)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // 🗄️ MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/smartbell';
