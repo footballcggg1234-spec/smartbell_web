@@ -278,6 +278,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        let currentUser = null; // ตัวแปรเก็บชื่อผู้ใช้ปัจจุบัน
         const SERVER_URL = 'https://smartbell-web.onrender.com';
 
         // ================= 🌙 ระบบธีม =================
@@ -300,6 +301,7 @@
 
         // ================= 🔐 ระบบ Login & Register & OTP =================
         let isLoginMode = true;
+        
 
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
@@ -347,12 +349,10 @@
             }
         }
 
-        document.getElementById('authForm').addEventListener('submit', async (e) => {
+document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = document.getElementById('authUser').value;
             const pass = document.getElementById('authPass').value;
-            const email = document.getElementById('authEmail').value;
-            const otp = document.getElementById('authOtp').value;
             const btn = document.getElementById('authSubmitBtn');
             const originalText = btn.innerText;
 
@@ -360,7 +360,7 @@
             btn.disabled = true;
 
             const endpoint = isLoginMode ? '/api/login' : '/api/register';
-            const payload = isLoginMode ? { username: user, password: pass } : { username: user, email: email, password: pass, otp: otp };
+            const payload = { username: user, password: pass };
 
             try {
                 const res = await fetch(`${SERVER_URL}${endpoint}`, {
@@ -373,8 +373,8 @@
                     showToast(data.message);
                     if (isLoginMode) {
                         sessionStorage.setItem('isLoggedIn', 'true');
-                        sessionStorage.setItem('username', data.username || user);
-                        setTimeout(() => showApp(data.username || user), 800);
+                        sessionStorage.setItem('username', data.username);
+                        setTimeout(() => showApp(data.username), 800);
                     } else {
                         setTimeout(() => { toggleAuthMode(); document.getElementById('authPass').value = ''; }, 1500);
                         btn.innerHTML = originalText; btn.disabled = false;
@@ -388,28 +388,57 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('isLoggedIn') === 'true') showApp(sessionStorage.getItem('username'));
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                showApp(sessionStorage.getItem('username'));
+            }
         });
 
         function showApp(username) {
-            if(username) {
-                document.getElementById('displayUserDesk').innerText = username;
-                document.getElementById('displayUserMob').innerText = username;
-            }
+            currentUser = username; // เก็บชื่อผู้ใช้
+            socket.emit('join_room', currentUser); // ⚠️ แจ้งเซิร์ฟเวอร์ว่าเราอยู่ห้องนี้นะ
+            
+            document.getElementById('displayUserDesk').innerText = currentUser;
+            document.getElementById('displayUserMob').innerText = currentUser;
             document.getElementById('login-wrapper').classList.add('hidden');
             document.getElementById('app-wrapper').classList.add('visible');
             fetchSchedules(); 
         }
 
-        function handleLogout() {
-            if(confirm('ต้องการออกจากระบบหรือไม่?')) {
-                sessionStorage.removeItem('isLoggedIn'); sessionStorage.removeItem('username');
-                document.getElementById('app-wrapper').classList.remove('visible');
-                document.getElementById('login-wrapper').classList.remove('hidden');
-                document.getElementById('authPass').value = ''; document.getElementById('authOtp').value = '';
-                document.getElementById('authSubmitBtn').innerText = isLoginMode ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
-                document.getElementById('authSubmitBtn').disabled = false;
-            }
+        socket.on('schedule_updated', () => fetchSchedules());
+
+        // ⚠️ แนบ owner ไปด้วยตอนดึงข้อมูล
+        async function fetchSchedules() {
+            if(!currentUser) return;
+            try {
+                const res = await fetch(`${SERVER_URL}/api/schedules?owner=${currentUser}`);
+                renderSchedules(await res.json());
+            } catch (e) { document.getElementById('schedule-container').innerHTML = '<p>เซิร์ฟเวอร์มีปัญหา</p>'; }
+        }
+
+        // ⚠️ แนบ owner ไปด้วยตอนสร้างตารางเวลาใหม่
+        document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const time = document.getElementById('inputTime').value;
+            const title = document.getElementById('inputTitle').value;
+            const audio = document.getElementById('inputAudio').value;
+            try {
+                const res = await fetch(`${SERVER_URL}/api/schedules`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ owner: currentUser, time, title, audio }) 
+                });
+                if (res.ok) { closeModal(); showToast('เพิ่มอุปกรณ์เรียบร้อย'); }
+            } catch (err) {}
+        });
+
+        // ⚠️ สั่งออดโดยระบุ owner
+        function forcePlayBell(audio, name) { 
+            socket.emit('force_play_bell', { audio: audio, owner: currentUser }); 
+            showToast(`สั่งรัน: ${name}`); 
+        }
+        function stopBell() { 
+            socket.emit('force_stop_bell', { owner: currentUser }); 
+            showToast('ระงับเสียงแล้ว'); 
         }
 
         // ================= ⚙️ ระบบ UI & Sockets =================
