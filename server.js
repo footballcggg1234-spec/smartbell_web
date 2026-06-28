@@ -39,12 +39,12 @@ const User = mongoose.model('User', userSchema);
 // ================= 📧 ระบบอีเมล และ OTP =================
 const otpStore = new Map(); // เก็บ OTP ชั่วคราว
 
-// ตั้งค่าอีเมล (ใส่ของตัวเองในไฟล์ .env ถ้าต้องการให้ส่งเข้าเมลจริง)
+// ตั้งค่าอีเมล (บังคับใช้ตัวแปรจาก Environment ของ Render เพื่อความชัวร์)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'ises12345678927@gmail.com',
-    pass: process.env.EMAIL_PASS || 'lunyqhrkgacfsslt'
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS  
   }
 });
 
@@ -72,6 +72,8 @@ app.post('/api/send-otp', async (req, res) => {
       });
       res.json({ success: true, message: 'ส่งรหัส OTP ไปที่อีเมลแล้ว' });
     } catch (mailErr) {
+      // เพิ่มการแจ้งเตือน Error ในหน้า Logs เพื่อให้รู้สาเหตุที่แท้จริง
+      console.error('❌ ไม่สามารถส่งอีเมลได้ สาเหตุ:', mailErr);
       res.json({ success: true, message: 'ระบบทดสอบ: ดูรหัส OTP ได้ที่หน้าจอ Console เซิร์ฟเวอร์' });
     }
   } catch (err) {
