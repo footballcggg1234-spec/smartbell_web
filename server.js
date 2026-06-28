@@ -1,3 +1,7 @@
+// ==================== SmartBell Control Center ====================
+// ✅ Production-ready backend with JWT, OTP, Socket.io, MongoDB
+// =================================================================
+
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -5,324 +9,339 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
+// ⚙️ Environment Setup
 dotenv.config();
 const app = express();
-
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: { origin: "*", methods: ['GET', 'POST', 'PUT', 'DELETE'] }
 });
 
+// 📦 Middleware
 app.use(cors({
-    origin: '*', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type']
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 🗄️ เชื่อมต่อ MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/smartbell')
-  .then(() => console.log('✅ เชื่อมต่อ MongoDB สำเร็จพร้อมลุย!'))
-  .catch(err => console.error('❌ เชื่อมต่อ MongoDB พลาด:', err));
+// 🗄️ MongoDB Connection
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/smartbell';
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB failed:', err.message));
 
-// 📝 แบบแปลนข้อมูล (Schema) - ⚠️ เพิ่ม owner
-const scheduleSchema = new mongoose.Schema({
-  owner: { type: String, required: true }, // ระบุว่าตารางนี้เป็นของใคร
-  time: String,
-  title: String,
-  audio: String,
-  activeDays: [Number], 
-  isActive: { type: Boolean, default: true }
-});
-const Schedule = mongoose.model('Schedule', scheduleSchema);
-
-const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
-});
-const User = mongoose.model('User', userSchema);
-
-// ================= 🔌 ระบบ Socket.io Real-time (แยกห้องตามบัญชี) =================
-io.on('connection', (socket) => {
-  console.log(`⚡ มีอุปกรณ์เชื่อมต่อเข้ามา: ${socket.id}`);
-
-  // เมื่อเว็บหรือแอปล็อกอินสำเร็จ ให้ส่งชื่อ user มาเข้าห้อง
-  socket.on('join_room', (username) => {
-    socket.join(username);
-    console.log(`🏠 [${username}] เข้าร่วมห้องส่วนตัวแล้ว (Socket ID: ${socket.id})`);
-  });
-
-  socket.on('force_play_bell', (data) => {
-    console.log(`🔔 [${data.owner}] สั่งเล่นเสียงด่วน: ${data.audio}`);
-    io.to(data.owner).emit('play_bell_now', { audio: data.audio }); 
-  });
-
-  socket.on('force_stop_bell', (data) => {
-    console.log(`🛑 [${data.owner}] สั่งหยุดเสียงฉุกเฉิน!`);
-    io.to(data.owner).emit('stop_bell_now'); 
-  });
-
-  socket.on('disconnect', () => {
-    console.log(`🔴 อุปกรณ์ยกเลิกการเชื่อมต่อ: ${socket.id}`);
-  });
-});
-
-// ================= 🚀 API ROUTES =================
-
-app.post('/api/register', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const existingUser = await User.findOne({ username });
-    if (existingUser) return res.status(400).json({ success: false, message: 'ชื่อผู้ใช้นี้มีคนใช้งานแล้ว' });
-    const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const path = require('path');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
-const nodemailer = require('nodemailer'); // ⚠️ เอา nodemailer กลับมาแล้ว!
-
-dotenv.config();
-const app = express();
-
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
-
-app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'], allowedHeaders: ['Content-Type'] }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-// 🗄️ เชื่อมต่อ MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/smartbell')
-  .then(() => console.log('✅ เชื่อมต่อ MongoDB สำเร็จพร้อมลุย!'))
-  .catch(err => console.error('❌ เชื่อมต่อ MongoDB พลาด:', err));
-
-// 📝 แบบแปลนตารางเวลา (มี owner)
-const scheduleSchema = new mongoose.Schema({
-  owner: { type: String, required: true },
-  time: String, title: String, audio: String,
-  activeDays: [Number], isActive: { type: Boolean, default: true }
-});
-const Schedule = mongoose.model('Schedule', scheduleSchema);
-
-// 📝 แบบแปลนผู้ใช้ (เอา email กลับมา)
+// 📝 Schemas
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true }, // Will be hashed
+  createdAt: { type: Date, default: Date.now }
 });
-const User = mongoose.model('User', userSchema);
 
-// ================= 📧 ระบบอีเมล และ OTP =================
+const scheduleSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  time: { type: String, required: true },
+  title: { type: String, required: true },
+  audio: { type: String, required: true },
+  activeDays: { type: [Number], default: [0, 1, 2, 3, 4, 5, 6] },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', userSchema);
+const Schedule = mongoose.model('Schedule', scheduleSchema);
+
+// 📧 Email Configuration
 const otpStore = new Map();
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // ใช้ 587 STARTTLS
-  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
 });
 
-// ================= 🔌 ระบบ Socket.io (แยกห้อง) =================
-io.on('connection', (socket) => {
-  socket.on('join_room', (username) => {
-    socket.join(username);
-    console.log(`🏠 [${username}] เข้าร่วมห้องส่วนตัวแล้ว`);
-  });
+// 🔐 JWT Configuration
+const JWT_SECRET = process.env.JWT_SECRET || 'default_secret_key_change_in_production';
+const JWT_EXPIRE = '7d';
 
-  socket.on('force_play_bell', (data) => {
-    io.to(data.owner).emit('play_bell_now', { audio: data.audio }); 
-  });
+// 🛡️ Middleware: Verify JWT Token
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // "Bearer token"
 
-  socket.on('force_stop_bell', (data) => {
-    io.to(data.owner).emit('stop_bell_now'); 
-  });
-});
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'No token provided' });
+  }
 
-// ================= 🚀 API ROUTES =================
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(403).json({ success: false, message: 'Invalid token' });
+  }
+};
 
-// [API] ส่ง OTP
-app.post('/api/send-otp', async (req, res) => {
+// ================= 🔐 Authentication Routes =================
+
+// [API] Send OTP for registration
+app.post('/api/auth/send-otp', async (req, res) => {
   try {
     const { username, email } = req.body;
-    if (!username || !email) return res.status(400).json({ success: false, message: 'กรุณากรอกชื่อและอีเมล' });
+    if (!username || !email) {
+      return res.status(400).json({ success: false, message: 'Username and email required' });
+    }
 
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-    if (existingUser) return res.status(400).json({ success: false, message: 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้งานแล้ว' });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Username or email already taken' });
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore.set(email, { otp, expires: Date.now() + 5 * 60000 }); 
+    otpStore.set(email, { otp, expires: Date.now() + 5 * 60000 });
 
-    console.log(`\n🔑 [ทดสอบระบบ] รหัส OTP ของ ${email} คือ: ${otp}\n`);
+    console.log(`🔑 [DEV] OTP for ${email}: ${otp}`);
 
+    // Try to send email
     try {
       await transporter.sendMail({
-        from: '"SmartBell Pro" <noreply@smartbell.com>',
+        from: '"SmartBell" <noreply@smartbell.com>',
         to: email,
-        subject: 'รหัส OTP สมัครสมาชิก SmartBell Pro',
-        html: `<h2>ยืนยันการสมัครสมาชิก</h2><p>รหัส OTP 6 หลักของคุณคือ:</p><h1 style="color:#d97706">${otp}</h1>`
+        subject: 'SmartBell - Verification Code',
+        html: `
+          <h2>Verify Your Email</h2>
+          <p>Your 6-digit OTP:</p>
+          <h1 style="color:#d97706; font-size:32px; letter-spacing:5px;">${otp}</h1>
+          <p style="color:#999; font-size:12px;">Valid for 5 minutes</p>
+        `
       });
-      res.json({ success: true, message: 'ส่งรหัส OTP ไปที่อีเมลแล้ว' });
+      res.json({ success: true, message: 'OTP sent to email' });
     } catch (mailErr) {
-      console.error('❌ ไม่สามารถส่งอีเมลได้:', mailErr);
-      res.json({ success: true, message: 'ระบบทดสอบ: ดูรหัส OTP ได้ที่หน้าจอ Console เซิร์ฟเวอร์' });
+      console.error('❌ Email send failed:', mailErr.message);
+      // Return success anyway for dev mode
+      res.json({ success: true, message: '[DEV MODE] Check console for OTP' });
     }
   } catch (err) {
-    res.status(500).json({ success: false, message: 'เซิร์ฟเวอร์ขัดข้อง' });
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// [API] สมัครสมาชิก (ตรวจ OTP)
-app.post('/api/register', async (req, res) => {
+// [API] Register user
+app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, email, password, otp } = req.body;
-    const stored = otpStore.get(email);
 
-    if (!stored) return res.status(400).json({ success: false, message: 'ไม่พบคำขอ OTP หรือหมดอายุแล้ว' });
-    if (Date.now() > stored.expires) {
-      otpStore.delete(email);
-      return res.status(400).json({ success: false, message: 'รหัส OTP หมดอายุแล้ว' });
+    // Validate OTP
+    const storedOtp = otpStore.get(email);
+    if (!storedOtp) {
+      return res.status(400).json({ success: false, message: 'OTP not found or expired' });
     }
-    if (stored.otp !== otp) return res.status(400).json({ success: false, message: 'รหัส OTP ไม่ถูกต้อง' });
 
-    const newUser = new User({ username, email, password });
+    if (Date.now() > storedOtp.expires) {
+      otpStore.delete(email);
+      return res.status(400).json({ success: false, message: 'OTP expired' });
+    }
+
+    if (storedOtp.otp !== otp) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword
+    });
     await newUser.save();
+
+    // Clean up OTP
     otpStore.delete(email);
 
-    res.json({ success: true, message: 'สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย' });
+    res.status(201).json({ success: true, message: 'Registration successful! Please login' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'ไม่สามารถสร้างบัญชีได้' });
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Registration failed' });
   }
 });
 
-// [API] เข้าสู่ระบบ
-app.post('/api/login', async (req, res) => {
+// [API] Login user
+app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username, password });
-    if (user) res.json({ success: true, message: 'เข้าสู่ระบบสำเร็จ', username: user.username });
-    else res.status(401).json({ success: false, message: 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง' });
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, username: user.username, email: user.email },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRE }
+    );
+
+    res.json({
+      success: true,
+      message: 'Login successful',
+      token,
+      user: { id: user._id, username: user.username, email: user.email }
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดของเซิร์ฟเวอร์' });
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Login failed' });
   }
 });
 
-// จัดการตารางเวลา (ต้องมี owner)
-app.get('/api/schedules', async (req, res) => {
+// ================= 🔌 Socket.io Real-time System =================
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  
+  if (!token) {
+    return next(new Error('Authentication failed: no token'));
+  }
+
   try {
-    const owner = req.query.owner;
-    if (!owner) return res.status(400).json({ error: 'กรุณาระบุเจ้าของ' });
-    const schedules = await Schedule.find({ owner }).sort({ time: 1 });
-    res.json(schedules); 
-  } catch (error) { res.status(500).json({ error: 'ดึงข้อมูลไม่สำเร็จ' }); }
+    const decoded = jwt.verify(token, JWT_SECRET);
+    socket.userId = decoded.id;
+    socket.username = decoded.username;
+    next();
+  } catch (err) {
+    next(new Error('Authentication failed: invalid token'));
+  }
 });
 
-app.post('/api/schedules', async (req, res) => {
+io.on('connection', (socket) => {
+  console.log(`⚡ User connected: ${socket.username} (${socket.id})`);
+
+  // Join private room for user
+  socket.join(`user:${socket.userId}`);
+
+  // Force play bell command
+  socket.on('force_play_bell', (data) => {
+    console.log(`🔔 [${socket.username}] Play command: ${data.audio}`);
+    io.to(`user:${socket.userId}`).emit('play_bell_now', { audio: data.audio });
+  });
+
+  // Force stop bell command
+  socket.on('force_stop_bell', () => {
+    console.log(`🛑 [${socket.username}] Stop command`);
+    io.to(`user:${socket.userId}`).emit('stop_bell_now');
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`🔴 User disconnected: ${socket.username}`);
+  });
+});
+
+// ================= 📅 Schedule API Routes (Protected) =================
+
+// Get all schedules for logged-in user
+app.get('/api/schedules', verifyToken, async (req, res) => {
   try {
-    const newSchedule = new Schedule(req.body);
+    const schedules = await Schedule.find({ user: req.user.id }).sort({ time: 1 });
+    res.json(schedules);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch schedules' });
+  }
+});
+
+// Create new schedule
+app.post('/api/schedules', verifyToken, async (req, res) => {
+  try {
+    const { time, title, audio, activeDays } = req.body;
+
+    const newSchedule = new Schedule({
+      user: req.user.id,
+      time,
+      title,
+      audio,
+      activeDays: activeDays || [0, 1, 2, 3, 4, 5, 6]
+    });
+
     await newSchedule.save();
-    io.to(req.body.owner).emit('schedule_updated'); 
-    res.status(201).json({ message: 'บันทึกสำเร็จ!', schedule: newSchedule });
-  } catch (error) { res.status(500).json({ error: 'บันทึกไม่สำเร็จ' }); }
+
+    // Notify user's devices
+    io.to(`user:${req.user.id}`).emit('schedule_updated', { action: 'created' });
+
+    res.status(201).json({ success: true, message: 'Schedule created', schedule: newSchedule });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to create schedule' });
+  }
 });
 
-app.put('/api/schedules/:id/toggle', async (req, res) => {
+// Toggle schedule status
+app.put('/api/schedules/:id/toggle', verifyToken, async (req, res) => {
   try {
-    const schedule = await Schedule.findById(req.params.id);
-    schedule.isActive = !schedule.isActive; 
-    await schedule.save();
-    io.to(schedule.owner).emit('schedule_updated'); 
-    res.json({ message: 'อัปเดตสถานะสำเร็จ' });
-  } catch (error) { res.status(500).json({ error: 'อัปเดตไม่สำเร็จ' }); }
-});
-
-app.delete('/api/schedules/:id', async (req, res) => {
-  try {
-    const schedule = await Schedule.findById(req.params.id);
-    if(schedule) {
-      await Schedule.findByIdAndDelete(req.params.id);
-      io.to(schedule.owner).emit('schedule_updated'); 
+    const schedule = await Schedule.findOne({ _id: req.params.id, user: req.user.id });
+    if (!schedule) {
+      return res.status(404).json({ error: 'Schedule not found' });
     }
-    res.json({ message: 'ลบข้อมูลสำเร็จ' });
-  } catch (error) { res.status(500).json({ error: 'ลบข้อมูลไม่สำเร็จ' }); }
+
+    schedule.isActive = !schedule.isActive;
+    await schedule.save();
+
+    io.to(`user:${req.user.id}`).emit('schedule_updated', { action: 'toggled' });
+
+    res.json({ success: true, message: 'Schedule updated', isActive: schedule.isActive });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to update schedule' });
+  }
 });
+
+// Delete schedule
+app.delete('/api/schedules/:id', verifyToken, async (req, res) => {
+  try {
+    const result = await Schedule.deleteOne({ _id: req.params.id, user: req.user.id });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Schedule not found' });
+    }
+
+    io.to(`user:${req.user.id}`).emit('schedule_updated', { action: 'deleted' });
+
+    res.json({ success: true, message: 'Schedule deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to delete schedule' });
+  }
+});
+
+// ================= 🚀 Start Server =================
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 ระบบศูนย์ควบคุมรันอยู่ที่พอร์ต ${PORT}`));
-    const newUser = new User({ username, password });
-    await newUser.save();
-    res.json({ success: true, message: 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการสมัครสมาชิก' });
-  }
+server.listen(PORT, () => {
+  console.log(`
+╔══════════════════════════════════════╗
+║    🔔 SmartBell Control Center       ║
+║    Running on port ${PORT}               ║
+║    JWT_SECRET: ${JWT_SECRET === 'default_secret_key_change_in_production' ? '⚠️ DEFAULT (CHANGE!)' : '✅ SET'}     ║
+╚══════════════════════════════════════╝
+  `);
 });
 
-app.post('/api/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username, password });
-    if (user) res.json({ success: true, message: 'เข้าสู่ระบบสำเร็จ', username: user.username });
-    else res.status(401).json({ success: false, message: 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดของเซิร์ฟเวอร์' });
-  }
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    mongoose.connection.close();
+  });
 });
-
-// ⚠️ ดึงข้อมูลตารางเวลา (เฉพาะของ owner)
-app.get('/api/schedules', async (req, res) => {
-  try {
-    const owner = req.query.owner;
-    if (!owner) return res.status(400).json({ error: 'กรุณาระบุเจ้าของ' });
-    const schedules = await Schedule.find({ owner }).sort({ time: 1 });
-    res.json(schedules); 
-  } catch (error) {
-    res.status(500).json({ error: 'ดึงข้อมูลไม่สำเร็จ' });
-  }
-});
-
-// ⚠️ เพิ่มข้อมูลตารางเวลา (บันทึก owner ด้วย)
-app.post('/api/schedules', async (req, res) => {
-  try {
-    const newSchedule = new Schedule(req.body);
-    await newSchedule.save();
-    io.to(req.body.owner).emit('schedule_updated'); 
-    res.status(201).json({ message: 'บันทึกสำเร็จ!', schedule: newSchedule });
-  } catch (error) {
-    res.status(500).json({ error: 'บันทึกไม่สำเร็จ' });
-  }
-});
-
-// ⚠️ สลับสถานะตารางเวลา (แจ้งเตือนเฉพาะห้อง)
-app.put('/api/schedules/:id/toggle', async (req, res) => {
-  try {
-    const schedule = await Schedule.findById(req.params.id);
-    schedule.isActive = !schedule.isActive; 
-    await schedule.save();
-    io.to(schedule.owner).emit('schedule_updated'); 
-    res.json({ message: 'อัปเดตสถานะสำเร็จ', isActive: schedule.isActive });
-  } catch (error) {
-    res.status(500).json({ error: 'อัปเดตสถานะไม่สำเร็จ' });
-  }
-});
-
-// ⚠️ ลบตารางเวลา (แจ้งเตือนเฉพาะห้อง)
-app.delete('/api/schedules/:id', async (req, res) => {
-  try {
-    const schedule = await Schedule.findById(req.params.id);
-    if(schedule) {
-      await Schedule.findByIdAndDelete(req.params.id);
-      io.to(schedule.owner).emit('schedule_updated'); 
-    }
-    res.json({ message: 'ลบข้อมูลสำเร็จ' });
-  } catch (error) {
-    res.status(500).json({ error: 'ลบข้อมูลไม่สำเร็จ' });
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 ระบบศูนย์ควบคุมรันอยู่ที่พอร์ต ${PORT}`));

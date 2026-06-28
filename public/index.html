@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SmartBell - Authentication System</title>
+    <title>SmartBell - Control Center</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -21,7 +21,6 @@
             --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.8);
             --shadow-hover: 0 16px 40px rgba(217, 119, 6, 0.12), inset 0 1px 1px rgba(255, 255, 255, 1);
             --shadow-btn: 0 10px 25px rgba(217, 119, 6, 0.3);
-            --sidebar-width: 280px;
         }
 
         [data-theme="dark"] {
@@ -36,303 +35,188 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.4s, border-color 0.4s, color 0.4s, box-shadow 0.4s; }
         body { background-color: var(--bg-edge); color: var(--text-main); width: 100vw; height: 100vh; overflow: hidden; display: flex; position: relative; }
-        .amber-bg { position: absolute; inset: 0; z-index: 0; background-image: radial-gradient(125% 125% at 50% 10%, var(--bg-center) 40%, var(--bg-edge) 100%); background-size: 100% 100%; transition: background-image 0.5s ease; }
+        .amber-bg { position: absolute; inset: 0; z-index: 0; background-image: radial-gradient(125% 125% at 50% 10%, var(--bg-center) 40%, var(--bg-edge) 100%); background-size: 100% 100%; }
 
-        /* ================= 🔐 หน้าต่าง Login / Register ================= */
-        #login-wrapper { position: fixed; inset: 0; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease, visibility 0.5s ease; padding: 20px; }
+        /* Login Card */
+        #login-wrapper { position: fixed; inset: 0; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease; padding: 20px; }
         #login-wrapper.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .login-card { background: var(--glass-card); backdrop-filter: blur(40px); border: 1px solid var(--border-highlight); border-radius: var(--radius-xl); padding: 40px 40px; width: 100%; max-width: 420px; text-align: center; box-shadow: var(--shadow-hover); }
-        .login-card .icon-box { width: 64px; height: 64px; border-radius: 20px; background: var(--primary-grad); color: white; display: flex; justify-content: center; align-items: center; font-size: 28px; margin: 0 auto 20px; box-shadow: var(--shadow-btn); }
-        .login-title { font-size: 26px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+        .login-card { background: var(--glass-card); backdrop-filter: blur(40px); border: 1px solid var(--border-highlight); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 420px; text-align: center; box-shadow: var(--shadow-hover); }
+        .login-title { font-size: 26px; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
         .login-subtitle { font-size: 14px; color: var(--text-muted); font-weight: 500; margin-bottom: 25px; }
-        
-        .login-input { width: 100%; padding: 16px 20px; background: var(--glass-base); border: 1px solid var(--border-light); border-radius: 16px; outline: none; margin-bottom: 12px; font-size: 15px; color: var(--text-main); font-weight: 500; transition: 0.3s; }
+        .login-input { width: 100%; padding: 16px 20px; background: var(--glass-base); border: 1px solid var(--border-light); border-radius: 16px; outline: none; margin-bottom: 12px; font-size: 15px; color: var(--text-main); }
         .login-input:focus { border-color: var(--primary); background: var(--glass-solid); box-shadow: 0 0 0 4px var(--primary-light); }
-        .login-btn { width: 100%; background: var(--primary-grad); color: white; border: none; padding: 16px; border-radius: 100px; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.3s ease; box-shadow: var(--shadow-btn); margin-top: 10px; }
+        .login-btn { width: 100%; background: var(--primary-grad); color: white; border: none; padding: 16px; border-radius: 100px; font-weight: 600; font-size: 16px; cursor: pointer; margin-top: 10px; box-shadow: var(--shadow-btn); }
         .login-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(217, 119, 6, 0.4); }
-        .login-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
-        
-        .otp-btn { background: var(--glass-solid); color: var(--text-main); border: 1px solid var(--border-light); padding: 0 20px; border-radius: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; white-space: nowrap; margin-bottom: 12px; }
-        .otp-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
-        .otp-btn:disabled { opacity: 0.5; pointer-events: none; }
+        .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        .otp-btn { background: var(--glass-solid); color: var(--text-main); border: 1px solid var(--border-light); padding: 0 20px; border-radius: 16px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+        .toggle-auth { margin-top: 20px; font-size: 14px; color: var(--text-muted); }
+        .toggle-auth a { color: var(--primary); font-weight: 600; cursor: pointer; text-decoration: none; }
 
-        .toggle-auth { margin-top: 20px; font-size: 14px; color: var(--text-muted); font-weight: 500; }
-        .toggle-auth a { color: var(--primary); font-weight: 600; text-decoration: none; cursor: pointer; transition: 0.3s; }
-
-        /* ================= 🖥️ Layout หลัก ================= */
+        /* App Layout */
         #app-wrapper { position: relative; z-index: 1; display: flex; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: opacity 0.6s ease; }
         #app-wrapper.visible { opacity: 1; visibility: visible; }
-        .sidebar { width: var(--sidebar-width); background: var(--glass-base); height: 100vh; display: flex; flex-direction: column; padding: 40px 24px; z-index: 100; border-right: 1px solid var(--border-light); backdrop-filter: blur(40px); box-shadow: 10px 0 40px rgba(0, 0, 0, 0.05); }
-        .main-wrapper { flex-grow: 1; height: 100vh; overflow-y: auto; position: relative; z-index: 1; scroll-behavior: smooth; }
-        .main-wrapper::-webkit-scrollbar { display: none; }
-        
-        .brand-logo { font-size: 24px; font-weight: 700; color: var(--text-main); margin-bottom: 50px; display: flex; align-items: center; gap: 14px; padding-left: 8px; }
-        .brand-logo .icon-box { width: 44px; height: 44px; border-radius: 14px; background: var(--primary-grad); color: white; display: flex; justify-content: center; align-items: center; font-size: 20px; box-shadow: var(--shadow-btn); }
-        .sidebar-nav { display: flex; flex-direction: column; gap: 8px; }
-        .nav-item { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 20px; color: var(--text-muted); font-weight: 500; cursor: pointer; transition: 0.4s; font-size: 15px; border: 1px solid transparent; }
-        .nav-item:hover { background: var(--glass-card); color: var(--primary); transform: translateX(6px); }
-        .nav-item.active { background: var(--glass-solid); color: var(--primary); font-weight: 600; box-shadow: var(--shadow-glass); border-color: var(--border-highlight); }
-        .nav-item i { font-size: 18px; }
-        .theme-toggle-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--glass-solid); display: flex; justify-content: center; align-items: center; color: var(--text-main); box-shadow: var(--shadow-glass); border: 1px solid var(--border-light); cursor: pointer; transition: 0.3s; }
-        .theme-toggle-btn:hover { background: var(--glass-hover); transform: scale(1.05); }
+        .sidebar { width: 280px; background: var(--glass-base); height: 100vh; display: flex; flex-direction: column; padding: 40px 24px; border-right: 1px solid var(--border-light); backdrop-filter: blur(40px); }
+        .main-wrapper { flex-grow: 1; height: 100vh; overflow-y: auto; }
+        .main-wrapper::-webkit-scrollbar { width: 8px; }
+        .main-wrapper::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
 
-        /* ================= 📱 มือถือ ================= */
-        .mobile-header, .bottom-nav, .add-fab { display: none; }
-        @media (max-width: 768px) {
-            #app-wrapper { flex-direction: column; } .sidebar { display: none; } 
-            .mobile-header { display: flex; justify-content: space-between; align-items: center; background: var(--glass-base); backdrop-filter: blur(30px); padding: 15px 25px; position: fixed; top: 0; left: 0; width: 100%; z-index: 50; border-bottom: 1px solid var(--border-light); }
-            .mobile-header-title { font-size: 20px; font-weight: 700; color: var(--text-main); }
-            .bottom-nav { display: flex; justify-content: space-around; align-items: center; background: var(--glass-card); backdrop-filter: blur(40px); position: fixed; bottom: 20px; left: 4%; width: 92%; padding: 14px 0; border-radius: 40px; box-shadow: var(--shadow-glass); z-index: 50; border: 1px solid var(--border-highlight); }
-            .nav-item-mobile { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: 600; width: 60px; transition: 0.4s; }
-            .nav-item-mobile.active { color: var(--primary); transform: translateY(-3px); }
-            .add-fab { display: flex; justify-content: center; align-items: center; position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px; border-radius: 20px; background: var(--primary-grad); color: white; font-size: 24px; box-shadow: var(--shadow-btn); border: 1px solid var(--border-light); z-index: 40; }
-            .main-wrapper { padding-top: 80px; padding-bottom: 130px; } .page-container { padding: 20px !important; }
-        }
+        .brand-logo { font-size: 24px; font-weight: 700; color: var(--text-main); margin-bottom: 50px; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 8px; margin-bottom: auto; }
+        .nav-item { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 20px; color: var(--text-muted); font-weight: 500; cursor: pointer; transition: 0.4s; border: 1px solid transparent; }
+        .nav-item:hover { background: var(--glass-card); color: var(--primary); }
+        .nav-item.active { background: var(--glass-solid); color: var(--primary); border-color: var(--border-highlight); }
 
-        /* ================= 📜 เนื้อหา ================= */
-        .page-container { padding: 50px 60px; display: none; animation: blurFadeIn 0.6s forwards; max-width: 1400px; margin: 0 auto; opacity: 0; }
+        .page-container { padding: 50px 60px; display: none; }
         .page-container.active { display: block; }
-        @keyframes blurFadeIn { from { opacity: 0; transform: translateY(20px); filter: blur(10px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
-
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 45px; }
-        .section-title { font-size: 22px; font-weight: 700; color: var(--text-main); }
-        .desktop-add-btn { background: var(--primary-grad); color: white; border: 1px solid var(--border-light); padding: 12px 24px; border-radius: 100px; font-weight: 600; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-btn); transition: 0.3s; }
-        .desktop-add-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        @media (max-width: 768px) { .desktop-add-btn { display: none; } }
-
-        .tap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
-        .scene-card { background: var(--glass-card); backdrop-filter: blur(30px); padding: 25px 20px; border-radius: var(--radius-xl); box-shadow: var(--shadow-glass); cursor: pointer; display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border-light); transition: 0.4s; text-align: center; }
-        .scene-card:hover { transform: translateY(-6px); background: var(--glass-hover); border-color: var(--border-highlight); }
-        .scene-icon { width: 56px; height: 56px; border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 24px; margin-bottom: 16px; color: white; box-shadow: inset 0 2px 4px rgba(255,255,255,0.4), 0 8px 16px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1); }
-
+        .section-title { font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 24px; }
         .device-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
-        .device-card { background: var(--glass-card); backdrop-filter: blur(30px); border-radius: var(--radius-xl); padding: 26px; box-shadow: var(--shadow-glass); display: flex; flex-direction: column; position: relative; min-height: 180px; border: 1px solid var(--border-light); transition: 0.4s; overflow: hidden; }
+        .device-card { background: var(--glass-card); backdrop-filter: blur(30px); border-radius: var(--radius-xl); padding: 26px; box-shadow: var(--shadow-glass); border: 1px solid var(--border-light); transition: 0.4s; }
         .device-card:hover { transform: translateY(-4px); background: var(--glass-hover); }
-        .device-card.active { border-color: var(--border-highlight); background: var(--glass-solid); box-shadow: 0 15px 40px rgba(217,119,6,0.15), inset 0 1px 1px var(--border-highlight); }
-        
-        .device-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-        .device-icon-small { font-size: 24px; color: var(--primary); background: var(--primary-light); width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; border-radius: 18px; border: 1px solid var(--border-light); transition: 0.4s; }
-        .device-card.active .device-icon-small { color: white; background: var(--primary-grad); box-shadow: var(--shadow-btn); border: none; }
-        
-        .ios-switch { width: 52px; height: 32px; background: rgba(100,100,100,0.3); border-radius: 30px; position: relative; cursor: pointer; transition: 0.4s; border: 1px solid var(--border-light); box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-        .ios-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 26px; height: 26px; background: white; border-radius: 50%; transition: 0.4s; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
-        .ios-switch.active { background: var(--success); border-color: var(--success); }
-        .ios-switch.active::after { transform: translateX(20px); }
-        .device-time { font-size: 42px; font-weight: 200; color: var(--text-main); line-height: 1; letter-spacing: -2px; margin-top: auto; }
-        .delete-btn { position: absolute; bottom: 25px; right: 25px; background: var(--danger-light); color: var(--danger); border: none; width: 40px; height: 40px; border-radius: 14px; cursor: pointer; opacity: 0; transition: 0.3s; display: flex; justify-content: center; align-items: center; border: 1px solid var(--border-light); }
-        .device-card:hover .delete-btn { opacity: 1; transform: scale(1.05); }
+        .device-card.active { border-color: var(--border-highlight); background: var(--glass-solid); }
 
-        .log-item { display: flex; gap: 18px; align-items: flex-start; padding: 20px 0; border-bottom: 1px solid var(--border-light); }
-        .log-item:last-child { border-bottom: none; }
-        .log-icon { width: 48px; height: 48px; border-radius: 16px; background: var(--primary-light); color: var(--primary); display: flex; justify-content: center; align-items: center; font-size: 18px; border: 1px solid var(--border-light); box-shadow: inset 0 2px 4px rgba(255,255,255,0.2); }
-        
-        .settings-group { background: var(--glass-card); backdrop-filter: blur(30px); border-radius: var(--radius-xl); padding: 35px; margin-bottom: 25px; box-shadow: var(--shadow-glass); border: 1px solid var(--border-light); }
-        .form-control { width: 100%; padding: 16px 22px; background: var(--glass-base); border: 1px solid var(--border-light); border-radius: 16px; outline: none; margin-top: 10px; font-size: 16px; color: var(--text-main); font-weight: 500; transition: 0.3s; }
-        .form-control:focus { border-color: var(--primary); background: var(--glass-solid); box-shadow: 0 0 0 4px var(--primary-light); }
-
-        /* Modal & Toast */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.4s; z-index: 1000; }
         .modal-overlay.show { opacity: 1; visibility: visible; }
-        .modal-content { background: var(--glass-solid); backdrop-filter: blur(40px); width: 100%; max-width: 440px; padding: 45px; border-radius: 40px; transform: scale(0.9); transition: 0.4s; box-shadow: 0 40px 80px rgba(0,0,0,0.5); border: 1px solid var(--border-light); }
+        .modal-content { background: var(--glass-solid); backdrop-filter: blur(40px); width: 100%; max-width: 440px; padding: 45px; border-radius: 40px; transform: scale(0.9); transition: 0.4s; border: 1px solid var(--border-light); }
         .modal-overlay.show .modal-content { transform: scale(1); }
-        @media (max-width: 768px) { .modal-overlay { align-items: flex-end; } .modal-content { border-radius: 40px 40px 0 0; transform: translateY(100%); padding: 40px 25px 50px 25px; } }
-        
-        .toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(28, 25, 23, 0.95); backdrop-filter: blur(15px); color: white; padding: 14px 28px; border-radius: 100px; font-size: 15px; font-weight: 500; z-index: 9999; opacity: 0; transition: 0.4s; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: center; gap: 12px; pointer-events: none; }
+
+        .toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(28, 25, 23, 0.95); color: white; padding: 14px 28px; border-radius: 100px; font-size: 15px; font-weight: 500; z-index: 9999; opacity: 0; transition: 0.4s; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .page-container { padding: 20px; }
+            .device-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
     <div class="amber-bg"></div>
-    <div class="toast" id="toastMsg"><i class="fa-solid fa-circle-check" style="color: var(--primary);"></i> <span id="toastText">แจ้งเตือน</span></div>
+    <div class="toast" id="toastMsg"></div>
 
+    <!-- Login Screen -->
     <div id="login-wrapper">
         <div class="login-card">
-            <div class="icon-box"><i class="fa-solid fa-shield-halved"></i></div>
-            <h2 class="login-title" id="authTitle">SmartBell Pro</h2>
-            <p class="login-subtitle" id="authSubtitle">ระบบควบคุมเสียงออดอัจฉริยะ</p>
+            <h2 class="login-title">SmartBell Pro</h2>
+            <p class="login-subtitle">ระบบควบคุมเสียงออดอัจฉริยะ</p>
             
             <form id="authForm">
-                <input type="text" class="login-input" id="authUser" placeholder="ชื่อผู้ใช้งาน (Username)" required autocomplete="username">
+                <input type="text" class="login-input" id="authUser" placeholder="ชื่อผู้ใช้งาน" required>
                 
                 <div id="registerFields" style="display: none;">
-                    <input type="email" class="login-input" id="authEmail" placeholder="อีเมลสำหรับรับ OTP" autocomplete="email">
+                    <input type="email" class="login-input" id="authEmail" placeholder="อีเมล" required>
                     <div style="display: flex; gap: 10px;">
-                        <input type="text" class="login-input" id="authOtp" placeholder="รหัส OTP 6 หลัก" maxlength="6" style="margin-bottom: 12px;">
-                        <button type="button" class="otp-btn" id="btnSendOtp" onclick="sendOTP()">รับ OTP</button>
+                        <input type="text" class="login-input" id="authOtp" placeholder="รหัส OTP 6 หลัก" maxlength="6" style="flex: 1;">
+                        <button type="button" class="otp-btn" id="btnSendOtp" onclick="sendOTP(event)">รับ OTP</button>
                     </div>
                 </div>
 
-                <input type="password" class="login-input" id="authPass" placeholder="รหัสผ่าน (Password)" required autocomplete="current-password">
+                <input type="password" class="login-input" id="authPass" placeholder="รหัสผ่าน" required>
                 <button type="submit" class="login-btn" id="authSubmitBtn">เข้าสู่ระบบ</button>
             </form>
             <p class="toggle-auth">
-                <span id="authToggleText">ยังไม่มีบัญชีใช่ไหม?</span> 
+                <span id="authToggleText">ยังไม่มีบัญชี?</span> 
                 <a onclick="toggleAuthMode()">สมัครสมาชิก</a>
             </p>
         </div>
     </div>
 
+    <!-- App -->
     <div id="app-wrapper">
-        
         <div class="sidebar">
-            <div class="brand-logo"><div class="icon-box"><i class="fa-solid fa-building-columns"></i></div> SmartBell</div>
+            <div class="brand-logo">🔔 SmartBell</div>
             <div class="sidebar-nav">
-                <div class="nav-item active" onclick="switchTab('page-home', this)"><i class="fa-solid fa-layer-group"></i> Dashboard</div>
-                <div class="nav-item" onclick="switchTab('page-message', this)"><i class="fa-solid fa-clock-rotate-left"></i> Device Logs</div>
-                <div class="nav-item" onclick="switchTab('page-profile', this)"><i class="fa-solid fa-sliders"></i> Preferences</div>
+                <div class="nav-item active" onclick="switchTab('page-home', this)"><i class="fa-solid fa-gauge"></i> Dashboard</div>
+                <div class="nav-item" onclick="switchTab('page-schedules', this)"><i class="fa-solid fa-clock"></i> Schedules</div>
+                <div class="nav-item" onclick="switchTab('page-settings', this)"><i class="fa-solid fa-sliders"></i> Settings</div>
             </div>
-            
-            <div style="margin-top: auto; padding: 24px; background: var(--glass-card); border-radius: 28px; text-align: center; border: 1px solid var(--border-light); box-shadow: var(--shadow-glass);">
-                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-                    <div class="theme-toggle-btn" onclick="toggleTheme()" title="สลับโหมดหน้าจอ"><i class="fa-solid fa-moon theme-icon"></i></div>
-                    <div class="theme-toggle-btn" style="color: var(--danger);" onclick="handleLogout()" title="ออกจากระบบ"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
-                </div>
-                <div style="font-size: 16px; font-weight: 700; color: var(--text-main); text-transform: uppercase;" id="displayUserDesk">Admin</div>
-                <div style="font-size: 13px; color: var(--success); font-weight: 500;"><i class="fa-solid fa-circle" style="font-size:8px;"></i> System Online</div>
+            <div style="padding: 20px; background: var(--glass-card); border-radius: 20px; text-align: center; border: 1px solid var(--border-light);">
+                <div style="font-size: 16px; font-weight: 700; color: var(--text-main);" id="displayUser">User</div>
+                <div style="font-size: 13px; color: var(--success); margin-top: 5px;"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Online</div>
+                <button onclick="handleLogout()" style="width: 100%; margin-top: 15px; padding: 10px; background: var(--danger-light); color: var(--danger); border: none; border-radius: 12px; cursor: pointer; font-weight: 600;">Logout</button>
             </div>
         </div>
 
         <div class="main-wrapper">
-            <div class="mobile-header">
-                <div class="mobile-header-title" id="displayUserMob">SmartBell</div>
-                <div style="display: flex; gap: 10px;">
-                    <div onclick="toggleTheme()" style="width: 44px; height: 44px; border-radius: 16px; background: var(--glass-solid); display: flex; justify-content: center; align-items: center; color: var(--text-main); box-shadow: var(--shadow-glass); font-size: 18px; border: 1px solid var(--border-light); cursor: pointer;"><i class="fa-solid fa-moon theme-icon"></i></div>
-                    <div onclick="handleLogout()" style="width: 44px; height: 44px; border-radius: 16px; background: var(--glass-solid); display: flex; justify-content: center; align-items: center; color: var(--danger); box-shadow: var(--shadow-glass); font-size: 18px; border: 1px solid var(--border-light); cursor: pointer;"><i class="fa-solid fa-power-off"></i></div>
+            <div class="page-container active" id="page-home">
+                <h3 class="section-title">Quick Control</h3>
+                <div class="device-grid">
+                    <div class="device-card" style="cursor: pointer;" onclick="forcePlayBell('08.30.mp3')">
+                        <div style="font-size: 32px; margin-bottom: 10px;">🔔</div>
+                        <div style="font-weight: 600; color: var(--text-main);">Play Test Sound</div>
+                    </div>
+                    <div class="device-card" style="cursor: pointer;" onclick="stopBell()">
+                        <div style="font-size: 32px; margin-bottom: 10px;">🛑</div>
+                        <div style="font-weight: 600; color: var(--text-main);">Stop Sound</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="page-container active" id="page-home">
-                <div class="section-header" style="margin-top: 0;"><h3 class="section-title">Quick Control</h3></div>
-                <div class="tap-grid">
-                    <div class="scene-card" onclick="forcePlayBell('08.30.mp3', 'เข้าแถว')">
-                        <div class="scene-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="fa-solid fa-bullhorn"></i></div>
-                        <div style="font-size: 16px; font-weight: 600; color: var(--text-main);">ออดเข้าแถว</div>
-                    </div>
-                    <div class="scene-card" onclick="forcePlayBell('12.00.mp3', 'พักเที่ยง')">
-                        <div class="scene-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="fa-solid fa-utensils"></i></div>
-                        <div style="font-size: 16px; font-weight: 600; color: var(--text-main);">ออดพักเที่ยง</div>
-                    </div>
-                    <div class="scene-card" onclick="stopBell()">
-                        <div class="scene-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fa-solid fa-power-off"></i></div>
-                        <div style="font-size: 16px; font-weight: 600; color: var(--text-main);">หยุดเสียง</div>
-                    </div>
+            <div class="page-container" id="page-schedules">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h3 class="section-title" style="margin-bottom: 0;">Automations</h3>
+                    <button class="login-btn" style="width: auto; margin-top: 0; padding: 10px 20px;" onclick="openModal()">+ Add Schedule</button>
                 </div>
-                <div class="section-header"><h3 class="section-title">Automations</h3><button class="desktop-add-btn" onclick="openModal()"><i class="fa-solid fa-plus"></i> Add Schedule</button></div>
                 <div class="device-grid" id="schedule-container"></div>
             </div>
 
-            <div class="page-container" id="page-message">
-                <h3 class="section-title" style="margin-bottom: 25px;">Device Activity</h3>
-                <div class="settings-group" style="padding: 15px 30px;">
-                    <div class="log-item">
-                        <div class="log-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--success);"><i class="fa-solid fa-check-double"></i></div>
-                        <div>
-                            <div style="font-weight: 600; font-size: 16px; color: var(--text-main);">ระบบพร้อมทำงาน</div>
-                            <div style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">ศูนย์ควบคุมออนไลน์</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="page-container" id="page-profile">
-                <h3 class="section-title" style="margin-bottom: 25px;">Preferences</h3>
-                <div class="settings-group">
-                    <div style="font-weight: 600; margin-bottom: 15px; font-size: 17px; color: var(--text-main);">Theme Option</div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
-                        <div>
-                            <div style="font-size: 16px; font-weight: 500; color: var(--text-main);">Dark Mode</div>
-                            <div style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">เปิดโหมดกลางคืนเพื่อถนอมสายตา</div>
-                        </div>
-                        <div class="ios-switch" id="settingThemeSwitch" onclick="toggleTheme()"></div>
-                    </div>
+            <div class="page-container" id="page-settings">
+                <h3 class="section-title">Settings</h3>
+                <div style="background: var(--glass-card); padding: 25px; border-radius: 20px; border: 1px solid var(--border-light);">
+                    <div style="color: var(--text-muted);">Settings content here</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <button class="add-fab" onclick="openModal()"><i class="fa-solid fa-plus"></i></button>
-    <nav class="bottom-nav">
-        <div class="nav-item-mobile active" onclick="switchTab('page-home', this)"><i class="fa-solid fa-layer-group"></i><span>Home</span></div>
-        <div class="nav-item-mobile" onclick="switchTab('page-message', this)"><i class="fa-solid fa-clock-rotate-left"></i><span>Logs</span></div>
-        <div class="nav-item-mobile" onclick="switchTab('page-profile', this)"><i class="fa-solid fa-sliders"></i><span>Settings</span></div>
-    </nav>
-
+    <!-- Modal -->
     <div class="modal-overlay" id="addModal">
         <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px;">
-                <h3 style="font-size: 24px; font-weight: 700; color: var(--text-main);">New Schedule</h3>
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--glass-base); border: 1px solid var(--border-light); display: flex; justify-content: center; align-items: center; cursor: pointer;" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
-            </div>
+            <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 25px;">New Schedule</h3>
             <form id="scheduleForm">
-                <input type="time" class="login-input" required id="inputTime" style="margin-bottom: 24px;">
-                <input type="text" class="login-input" placeholder="e.g. เลิกเรียน" required id="inputTitle" style="margin-bottom: 24px;">
-                <select class="login-input" id="inputAudio" style="margin-bottom: 40px;">
-                    <option value="08.30.mp3">08.30.mp3</option>
-                    <option value="12.00.mp3">12.00.mp3</option>
+                <input type="time" class="login-input" id="inputTime" required placeholder="Time">
+                <input type="text" class="login-input" id="inputTitle" required placeholder="Title (e.g., Break Time)">
+                <select class="login-input" id="inputAudio" style="margin-bottom: 25px;">
+                    <option value="08.30.mp3">Morning Bell (08:30)</option>
+                    <option value="12.00.mp3">Lunch Bell (12:00)</option>
                 </select>
-                <button type="submit" class="desktop-add-btn" style="width: 100%; justify-content: center; padding: 20px; font-size: 17px; border-radius: 100px;">Create Automation</button>
+                <button type="submit" class="login-btn" style="width: 100%; padding: 16px;">Create</button>
             </form>
         </div>
     </div>
 
-<script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        const SERVER_URL = 'https://smartbell-web.onrender.com';
-        
-        // ⚠️ ย้าย 2 ตัวแปรนี้มาไว้บนสุด เพื่อป้องกัน Error "Cannot access before initialization"
-        let currentUser = null; 
-        const socket = io(SERVER_URL); 
-
-        // ================= 🌙 ระบบธีม =================
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcons(newTheme);
-        }
-
-        function updateThemeIcons(theme) {
-            document.querySelectorAll('.theme-icon').forEach(i => i.className = theme === 'dark' ? 'fa-solid fa-sun theme-icon' : 'fa-solid fa-moon theme-icon');
-            const settingSwitch = document.getElementById('settingThemeSwitch');
-            if(settingSwitch) { theme === 'dark' ? settingSwitch.classList.add('active') : settingSwitch.classList.remove('active'); }
-        }
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeIcons(savedTheme);
-
-        // ================= 🔐 ระบบ Login & Register & OTP =================
+        // ⚠️ ตัวแปร Global
+        // Line ~350 ในไฟล์ index.html
+         const SERVER_URL = 'https://smartbell-web.onrender.com';
+        let currentUser = null;
+        let authToken = null;
+        let socket = null;
         let isLoginMode = true;
 
+        // ================= 🔐 Auth System =================
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
-            document.getElementById('authTitle').innerText = isLoginMode ? "SmartBell Pro" : "สร้างบัญชีผู้ใช้งาน";
-            document.getElementById('authSubtitle').innerText = isLoginMode ? "ระบบควบคุมเสียงออดอัจฉริยะ" : "สมัครสมาชิกใหม่เพื่อเริ่มควบคุมระบบ";
-            document.getElementById('authSubmitBtn').innerText = isLoginMode ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
-            document.getElementById('authToggleText').innerText = isLoginMode ? "ยังไม่มีบัญชีใช่ไหม?" : "มีบัญชีอยู่แล้ว?";
-            document.querySelector('.toggle-auth a').innerText = isLoginMode ? "สมัครสมาชิก" : "เข้าสู่ระบบ";
-            
-            const regFields = document.getElementById('registerFields');
-            regFields.style.display = isLoginMode ? 'none' : 'block';
-            
-            document.getElementById('authEmail').required = !isLoginMode;
-            document.getElementById('authOtp').required = !isLoginMode;
+            document.getElementById('authSubmitBtn').innerText = isLoginMode ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
+            document.getElementById('registerFields').style.display = isLoginMode ? 'none' : 'block';
         }
 
-        async function sendOTP() {
+        async function sendOTP(e) {
+            e.preventDefault();
             const user = document.getElementById('authUser').value;
             const email = document.getElementById('authEmail').value;
-            if(!user || !email) return showToast('กรุณากรอกชื่อผู้ใช้งานและอีเมลก่อนกดรับ OTP');
+            if (!user || !email) return showToast('Please fill username and email');
 
-            const btn = document.getElementById('btnSendOtp');
+            const btn = e.target;
             btn.disabled = true;
-            btn.innerText = 'กำลังส่ง...';
+            btn.innerText = 'Sending...';
 
             try {
-                const res = await fetch(`${SERVER_URL}/api/send-otp`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: user, email: email })
+                const res = await fetch(`${SERVER_URL}/api/auth/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, email })
                 });
                 const data = await res.json();
                 showToast(data.message);
@@ -340,13 +224,19 @@
                 if (data.success) {
                     let timer = 60;
                     const countdown = setInterval(() => {
-                        btn.innerText = `ส่งอีกครั้ง (${timer}s)`;
+                        btn.innerText = `Resend (${timer}s)`;
                         timer--;
-                        if (timer < 0) { clearInterval(countdown); btn.innerText = 'รับ OTP'; btn.disabled = false; }
+                        if (timer < 0) {
+                            clearInterval(countdown);
+                            btn.innerText = 'Send OTP';
+                            btn.disabled = false;
+                        }
                     }, 1000);
-                } else { btn.innerText = 'รับ OTP'; btn.disabled = false; }
+                }
             } catch (err) {
-                showToast('ไม่สามารถส่ง OTP ได้'); btn.innerText = 'รับ OTP'; btn.disabled = false;
+                showToast('Failed to send OTP');
+                btn.disabled = false;
+                btn.innerText = 'Send OTP';
             }
         }
 
@@ -356,109 +246,139 @@
             const pass = document.getElementById('authPass').value;
             const email = document.getElementById('authEmail').value;
             const otp = document.getElementById('authOtp').value;
+
+            const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
+            const payload = isLoginMode 
+                ? { username: user, password: pass }
+                : { username: user, email, password: pass, otp };
+
             const btn = document.getElementById('authSubmitBtn');
-            const originalText = btn.innerText;
-
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังดำเนินการ...';
             btn.disabled = true;
-
-            const endpoint = isLoginMode ? '/api/login' : '/api/register';
-            const payload = isLoginMode ? { username: user, password: pass } : { username: user, email: email, password: pass, otp: otp };
+            btn.innerText = '⏳ Processing...';
 
             try {
                 const res = await fetch(`${SERVER_URL}${endpoint}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
                 const data = await res.json();
 
                 if (data.success) {
-                    showToast(data.message);
                     if (isLoginMode) {
-                        sessionStorage.setItem('isLoggedIn', 'true');
-                        sessionStorage.setItem('username', data.username || user);
-                        setTimeout(() => showApp(data.username || user), 800);
+                        authToken = data.token;
+                        currentUser = data.user;
+                        sessionStorage.setItem('token', authToken);
+                        sessionStorage.setItem('user', JSON.stringify(currentUser));
+                        showToast('Login successful!');
+                        setTimeout(() => initApp(), 800);
                     } else {
-                        setTimeout(() => { toggleAuthMode(); document.getElementById('authPass').value = ''; }, 1500);
-                        btn.innerHTML = originalText; btn.disabled = false;
+                        showToast('Registration successful! Please login');
+                        setTimeout(() => toggleAuthMode(), 1500);
                     }
                 } else {
-                    showToast(data.message); btn.innerHTML = originalText; btn.disabled = false;
+                    showToast(data.message);
                 }
             } catch (err) {
-                showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'); btn.innerHTML = originalText; btn.disabled = false;
+                showToast('Server connection failed');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = isLoginMode ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('isLoggedIn') === 'true') {
-                showApp(sessionStorage.getItem('username'));
-            }
-        });
-
-        function showApp(username) {
-            currentUser = username; 
-            socket.emit('join_room', currentUser); 
-            
-            if(currentUser) {
-                document.getElementById('displayUserDesk').innerText = currentUser;
-                document.getElementById('displayUserMob').innerText = currentUser;
-            }
+        // ================= 🔌 App Initialization =================
+        function initApp() {
             document.getElementById('login-wrapper').classList.add('hidden');
             document.getElementById('app-wrapper').classList.add('visible');
-            fetchSchedules(); 
+            document.getElementById('displayUser').innerText = currentUser.username;
+
+            // Initialize Socket.io with token auth
+            socket = io(SERVER_URL, {
+                auth: { token: authToken },
+                reconnection: true,
+                reconnectionDelay: 1000,
+                reconnectionAttempts: 5
+            });
+
+            socket.on('connect', () => {
+                console.log('✅ Socket.io connected');
+                showToast('Connected to server');
+            });
+
+            socket.on('schedule_updated', () => {
+                console.log('📅 Schedules updated');
+                fetchSchedules();
+            });
+
+            socket.on('disconnect', () => {
+                console.log('❌ Socket.io disconnected');
+            });
+
+            socket.on('error', (error) => {
+                console.error('Socket error:', error);
+                showToast('Connection error: ' + error);
+            });
+
+            fetchSchedules();
         }
 
-        function handleLogout() {
-            if(confirm('ต้องการออกจากระบบหรือไม่?')) {
-                sessionStorage.removeItem('isLoggedIn'); sessionStorage.removeItem('username');
-                currentUser = null;
-                document.getElementById('app-wrapper').classList.remove('visible');
-                document.getElementById('login-wrapper').classList.remove('hidden');
-                document.getElementById('authPass').value = ''; document.getElementById('authOtp').value = '';
-                document.getElementById('authSubmitBtn').innerText = isLoginMode ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
-                document.getElementById('authSubmitBtn').disabled = false;
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = sessionStorage.getItem('token');
+            const user = sessionStorage.getItem('user');
+
+            if (token && user) {
+                authToken = token;
+                currentUser = JSON.parse(user);
+                initApp();
             }
-        }
+        });
 
-        // ================= ⚙️ ระบบ UI & Sockets =================
-        function showToast(message) {
-            const t = document.getElementById('toastMsg'); document.getElementById('toastText').innerText = message;
-            t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000);
-        }
-        function switchTab(p, e) {
-            document.querySelectorAll('.page-container').forEach(p => p.classList.remove('active'));
-            document.getElementById(p).classList.add('active');
-            const i = Array.from(e.parentNode.children).indexOf(e);
-            document.querySelectorAll('.sidebar-nav .nav-item').forEach((n, idx) => n.classList.toggle('active', idx === i));
-            document.querySelectorAll('.bottom-nav .nav-item-mobile').forEach((n, idx) => n.classList.toggle('active', idx === i));
-            const fab = document.querySelector('.add-fab');
-            if(window.innerWidth <= 768) fab.style.display = p === 'page-home' ? 'flex' : 'none';
-        }
-        const modal = document.getElementById('addModal');
-        function openModal() { modal.classList.add('show'); }
-        function closeModal() { modal.classList.remove('show'); document.getElementById('scheduleForm').reset(); }
-
-        socket.on('schedule_updated', () => fetchSchedules());
-
+        // ================= 📅 Schedule Management =================
         async function fetchSchedules() {
-            if(!currentUser) return;
+            if (!authToken) return;
+
             try {
-                const res = await fetch(`${SERVER_URL}/api/schedules?owner=${currentUser}`);
-                renderSchedules(await res.json());
-            } catch (e) { document.getElementById('schedule-container').innerHTML = '<p style="color:var(--danger);text-align:center;grid-column:1/-1;">เซิร์ฟเวอร์มีปัญหา</p>'; }
+                const res = await fetch(`${SERVER_URL}/api/schedules`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (res.status === 401) {
+                    handleLogout();
+                    return;
+                }
+
+                const schedules = await res.json();
+                renderSchedules(schedules);
+            } catch (err) {
+                showToast('Failed to fetch schedules');
+            }
         }
 
         function renderSchedules(schedules) {
-            const container = document.getElementById('schedule-container'); container.innerHTML = ''; 
-            if (schedules.length === 0) { container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">ยังไม่มีตารางเวลา</p>'; return; }
+            const container = document.getElementById('schedule-container');
+            container.innerHTML = '';
+
+            if (schedules.length === 0) {
+                container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">No schedules yet</p>';
+                return;
+            }
+
             schedules.forEach(item => {
-                const c = document.createElement('div'); c.className = `device-card ${item.isActive ? 'active' : ''}`;
-                c.innerHTML = `<div class="device-header"><div class="device-icon-small"><i class="fa-regular fa-clock"></i></div>
-                        <div class="ios-switch ${item.isActive ? 'active' : ''}" onclick="toggleSchedule('${item._id}', this, event)"></div></div>
-                    <div class="device-info"><div class="device-time">${item.time}</div><div class="device-name">${item.title}</div></div>
-                    <button class="delete-btn" onclick="deleteSchedule('${item._id}', event)"><i class="fa-solid fa-trash"></i></button>`;
-                container.appendChild(c);
+                const card = document.createElement('div');
+                card.className = `device-card ${item.isActive ? 'active' : ''}`;
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <div style="font-size: 28px;">⏰</div>
+                        <div style="width: 50px; height: 30px; background: ${item.isActive ? '#10b981' : '#999'}; border-radius: 15px; cursor: pointer;" onclick="toggleSchedule('${item._id}', event)"></div>
+                    </div>
+                    <div style="font-size: 32px; font-weight: 200; color: var(--text-main); letter-spacing: -1px;">${item.time}</div>
+                    <div style="font-size: 16px; font-weight: 600; color: var(--text-main); margin-top: 10px;">${item.title}</div>
+                    <button onclick="deleteSchedule('${item._id}', event)" style="position: absolute; bottom: 15px; right: 15px; background: var(--danger-light); color: var(--danger); border: none; width: 35px; height: 35px; border-radius: 10px; cursor: pointer; font-size: 14px;">🗑️</button>
+                `;
+                container.appendChild(card);
             });
         }
 
@@ -467,33 +387,114 @@
             const time = document.getElementById('inputTime').value;
             const title = document.getElementById('inputTitle').value;
             const audio = document.getElementById('inputAudio').value;
+
             try {
-                const res = await fetch(`${SERVER_URL}/api/schedules`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ owner: currentUser, time, title, audio }) 
+                const res = await fetch(`${SERVER_URL}/api/schedules`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ time, title, audio })
                 });
-                if (res.ok) { closeModal(); showToast('เพิ่มอุปกรณ์เรียบร้อย'); }
-            } catch (err) {}
+
+                if (res.ok) {
+                    closeModal();
+                    showToast('Schedule created');
+                    fetchSchedules();
+                } else {
+                    showToast('Failed to create schedule');
+                }
+            } catch (err) {
+                showToast('Error creating schedule');
+            }
         });
 
-        async function toggleSchedule(id, el, e) {
+        async function toggleSchedule(id, e) {
             e.stopPropagation();
-            try { const res = await fetch(`${SERVER_URL}/api/schedules/${id}/toggle`, { method: 'PUT' }); if (res.ok) { el.classList.toggle('active'); el.closest('.device-card').classList.toggle('active'); } } catch (err) {}
+            try {
+                const res = await fetch(`${SERVER_URL}/api/schedules/${id}/toggle`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (res.ok) fetchSchedules();
+            } catch (err) {}
         }
+
         async function deleteSchedule(id, e) {
-            e.stopPropagation(); if(!confirm('ลบอุปกรณ์นี้?')) return;
-            try { const res = await fetch(`${SERVER_URL}/api/schedules/${id}`, { method: 'DELETE' }); if (res.ok) showToast('ลบแล้ว'); } catch (err) {}
+            e.stopPropagation();
+            if (!confirm('Delete this schedule?')) return;
+            try {
+                const res = await fetch(`${SERVER_URL}/api/schedules/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (res.ok) {
+                    showToast('Schedule deleted');
+                    fetchSchedules();
+                }
+            } catch (err) {}
         }
-        
-        function forcePlayBell(audio, name) { 
-            socket.emit('force_play_bell', { audio: audio, owner: currentUser }); 
-            showToast(`สั่งรัน: ${name}`); 
+
+        // ================= 🔔 Sound Control =================
+        function forcePlayBell(audio) {
+            if (socket && socket.connected) {
+                socket.emit('force_play_bell', { audio });
+                showToast(`Playing: ${audio}`);
+            } else {
+                showToast('Not connected to server');
+            }
         }
-        function stopBell() { 
-            socket.emit('force_stop_bell', { owner: currentUser }); 
-            showToast('ระงับเสียงแล้ว'); 
+
+        function stopBell() {
+            if (socket && socket.connected) {
+                socket.emit('force_stop_bell');
+                showToast('Sound stopped');
+            }
         }
+
+        // ================= 🎛️ UI Helpers =================
+        function switchTab(page, element) {
+            document.querySelectorAll('.page-container').forEach(p => p.classList.remove('active'));
+            document.getElementById(page).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function openModal() {
+            document.getElementById('addModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('addModal').classList.remove('show');
+            document.getElementById('scheduleForm').reset();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastMsg');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function handleLogout() {
+            if (confirm('Logout?')) {
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
+                authToken = null;
+                currentUser = null;
+                if (socket) socket.disconnect();
+                document.getElementById('app-wrapper').classList.remove('visible');
+                document.getElementById('login-wrapper').classList.remove('hidden');
+                document.getElementById('authPass').value = '';
+                document.getElementById('authOtp').value = '';
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('addModal').addEventListener('click', (e) => {
+            if (e.target.id === 'addModal') closeModal();
+        });
     </script>
 </body>
 </html>
