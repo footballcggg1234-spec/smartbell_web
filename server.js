@@ -43,8 +43,8 @@ const otpStore = new Map(); // เก็บ OTP ชั่วคราว
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'your-email@gmail.com',
-    pass: process.env.EMAIL_PASS || 'your-app-password'
+    user: process.env.EMAIL_USER || 'ises12345678927@gmail.com',
+    pass: process.env.EMAIL_PASS || 'luny qhrk gacf sslt'
   }
 });
 
