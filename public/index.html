@@ -188,8 +188,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // ⚠️ ตัวแปร Global
-        // Line ~350 ในไฟล์ index.html
-         const SERVER_URL = 'https://smartbell-web.onrender.com';
+        const SERVER_URL = window.location.origin; // Auto-detect server URL
         let currentUser = null;
         let authToken = null;
         let socket = null;
